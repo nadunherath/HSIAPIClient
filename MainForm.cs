@@ -68,8 +68,8 @@ namespace HSIAPIClient
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            txtClient.Text = "api_client";
-            txtSecretKey.Text = "asfn349nasd8sdf9";
+            txtClient.Text = "";
+            txtSecretKey.Text = "";
             txtSumAssured.Text = "100000";
             txtanb.Text = "31";
             txtTerm.Text = "10";
