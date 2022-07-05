@@ -109,7 +109,7 @@ namespace HSIAPIClient
             }
             else
             {
-                lblStatusMessage.Text = "Authentication Failed";
+                lblStatusMessage.Text = "Unexpected Error";
             }
         }
 
