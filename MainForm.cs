@@ -18,35 +18,37 @@ namespace HSIAPIClient
     public partial class MainForm : Form
     {
         private string _accessToken = "";
+
         private List<ValueText> planList = new List<ValueText>()
         {
-            new ValueText() {Text = "My Endowment", Value = "10"}, new ValueText() { Text = "My Retirement", Value = "11" } 
-            ,new ValueText() {Text = "My Off Springs", Value = "12"},new ValueText() {Text = "My Junior Life", Value = "20"},
-            new ValueText() {Text = "My Life Security", Value = "30"}, new ValueText() { Text = "My Life Cover", Value = "40" },
-            new ValueText() {Text = "My Life Benefits", Value = "50"},new ValueText() {Text = "My Funeral", Value = "90"}
+            new ValueText() { Text = "My Endowment", Value = "10" },
+            new ValueText() { Text = "My Retirement", Value = "11" },
+            new ValueText() { Text = "My Off Springs", Value = "12" },
+            new ValueText() { Text = "My Junior Life", Value = "20" },
+            new ValueText() { Text = "My Life Security", Value = "30" },
+            new ValueText() { Text = "My Life Cover", Value = "40" },
+            new ValueText() { Text = "My Life Benefits", Value = "50" },
+            new ValueText() { Text = "My Funeral", Value = "90" }
         };
 
         private List<ValueText> payModeList = new List<ValueText>()
         {
-            new ValueText() {Text = "Monthly", Value = "0"}, new ValueText() { Text = "Quarterly", Value = "1" }
-            ,new ValueText() {Text = "Half Yearly", Value = "2"},new ValueText() {Text = "Yearly", Value = "3"},
-           
+            new ValueText() { Text = "Monthly", Value = "0" }, new ValueText() { Text = "Quarterly", Value = "1" },
+            new ValueText() { Text = "Half Yearly", Value = "2" }, new ValueText() { Text = "Yearly", Value = "3" },
         };
 
         private List<ValueText> genderList = new List<ValueText>()
         {
-            new ValueText() {Text = "Male", Value = "M"}, new ValueText() { Text = "Female", Value = "F" }
-          
-
+            new ValueText() { Text = "Male", Value = "M" }, new ValueText() { Text = "Female", Value = "F" }
         };
 
         private List<ValueText> categoryList = new List<ValueText>()
         {
-            new ValueText() {Text = "Principle Holder", Value = "A"}, new ValueText() { Text = "Spouse", Value = "B" },
-            new ValueText() {Text = "Children", Value = "C"}, new ValueText() { Text = "Parents / Parents in Law", Value = "D" },
-            new ValueText() {Text = "Adult Dependent", Value = "E"}
-
-
+            new ValueText() { Text = "Principle Holder", Value = "A" },
+            new ValueText() { Text = "Spouse", Value = "B" },
+            new ValueText() { Text = "Children", Value = "C" },
+            new ValueText() { Text = "Parents / Parents in Law", Value = "D" },
+            new ValueText() { Text = "Adult Dependent", Value = "E" }
         };
 
         public MainForm()
@@ -89,13 +91,21 @@ namespace HSIAPIClient
             if (response.Result.StatusCode == HttpStatusCode.OK)
             {
                 var responseContent = response.Result.Content.ReadAsStringAsync();
-                var responseJson = Newtonsoft.Json.JsonConvert.DeserializeObject<AuthenticateResponse>(responseContent.Result);
-                _accessToken = responseJson?.access_token;
-                if (!string.IsNullOrEmpty(_accessToken))
+                if (responseContent.Result.Contains(
+                        "The user credentials were incorrect. Make sure your access token is valid!!"))
                 {
-                    lblStatusMessage.Text = "Succesfully Authenticated";
+                    lblStatusMessage.Text = "Authentication Failed";
                 }
-
+                else
+                {
+                    var responseJson =
+                        Newtonsoft.Json.JsonConvert.DeserializeObject<AuthenticateResponse>(responseContent.Result);
+                    _accessToken = responseJson?.access_token;
+                    if (!string.IsNullOrEmpty(_accessToken))
+                    {
+                        lblStatusMessage.Text = "Succesfully Authenticated";
+                    }
+                }
             }
             else
             {
@@ -105,19 +115,18 @@ namespace HSIAPIClient
 
         private void button1_Click(object sender, EventArgs e)
         {
-            var plan =  (string)cmbPlan.SelectedValue;
-            var payMode =  (string)cmbPayMode.SelectedValue;
-            var gender =  (string)cmbGender.SelectedValue;
-            var category =  (string)cmbCategory.SelectedValue;
+            var plan = (string)cmbPlan.SelectedValue;
+            var payMode = (string)cmbPayMode.SelectedValue;
+            var gender = (string)cmbGender.SelectedValue;
+            var category = (string)cmbCategory.SelectedValue;
             var sumAssured = txtSumAssured.Text;
             var anb = txtanb.Text;
             var term = txtTerm.Text;
-            CalculateRetirement(plan,payMode,gender,category,sumAssured,anb,term);
-
-
+            CalculateRetirement(plan, payMode, gender, category, sumAssured, anb, term);
         }
 
-        private void CalculateRetirement(string plan, string payMode, string gender, string category, string sumAssured, string anb, string term)
+        private void CalculateRetirement(string plan, string payMode, string gender, string category, string sumAssured,
+            string anb, string term)
         {
             string retirementUrl = GetUrl(plan);
             var client = new HttpClient();
@@ -136,7 +145,8 @@ namespace HSIAPIClient
             if (response.Result.StatusCode == HttpStatusCode.OK)
             {
                 var responseContent = response.Result.Content.ReadAsStringAsync();
-                var planResponseJson = Newtonsoft.Json.JsonConvert.DeserializeObject<PlanResponseData>(responseContent.Result);
+                var planResponseJson =
+                    Newtonsoft.Json.JsonConvert.DeserializeObject<PlanResponseData>(responseContent.Result);
                 var _model_prem = planResponseJson?.modal_prem;
                 var _model_status = planResponseJson?.success;
                 var _model_message = planResponseJson?.message;
@@ -147,9 +157,7 @@ namespace HSIAPIClient
                     lblMessage.Text = _model_message;
                     lblStatus.Text = _model_status.ToString();
                 }
-
             }
-
         }
 
         private string GetUrl(string plan)
@@ -186,7 +194,5 @@ namespace HSIAPIClient
             }
             return url;
         }
-
-      
     }
 }
